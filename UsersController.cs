@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Task.Models;
-using Task.models;
-
 namespace Task.Controllers
 {
     [Route("api/[controller]")]
@@ -15,46 +13,39 @@ namespace Task.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserDBContext _context;
-
         public UsersController(UserDBContext context)
         {
             _context = context;
         }
-
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
         }
-
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(long id)
         {
             var user = await _context.Users.FindAsync(id);
-
             if (user == null)
             {
                 return NotFound();
             }
-
             return user;
         }
-         // GET: api/Users/5
-        [HttpGet("{name}")]
-        public async Task<ActionResult<User>> GetUser(string email )
+        // GET: api/Users/5
+        [HttpGet("{Email}")]
+        public async Task<ActionResult<User>> GetUser(string Email)
         {
-            var user = await _context.Users.FindAsync(email);
-
+            var user = await _context.Users.FindAsync(Email);
             if (user == null)
             {
                 return NotFound();
             }
-
+            else
             return user;
         }
-      
          // PUT: api/Users/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
@@ -65,9 +56,7 @@ namespace Task.Controllers
             {
                 return BadRequest();
             }
-
             _context.Entry(user).State = EntityState.Modified;
-
             try
             {
                 await _context.SaveChangesAsync();
@@ -83,22 +72,30 @@ namespace Task.Controllers
                     throw;
                 }
             }
-
             return NoContent();
         }
-
         // POST: api/Users
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
-        }
-
+     //public async Task<ActionResult<User>> PostUser(User user)
+        // {
+        //     _context.Users.Add(user);
+        //     await _context.SaveChangesAsync();
+        //     return CreatedAtAction("GetUser", new { id = user.Id }, user);
+       //  } 
+[HttpPost]
+         public async Task<ActionResult<User>> Postusermaster(User user)
+    {
+          User existingemail = await _context.Users.SingleOrDefaultAsync(
+     m => m.Email == user.Email);
+            if (existingemail != null)
+            {
+              return BadRequest();
+          }
+          _context.Users.Add(user);
+           await _context.SaveChangesAsync();
+         return CreatedAtAction("Getuser", new { email = user.Email }, user);
+       }
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<User>> DeleteUser(long id)
@@ -108,16 +105,23 @@ namespace Task.Controllers
             {
                 return NotFound();
             }
-
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
-
             return user;
         }
-
         private bool UserExists(long id)
         {
             return _context.Users.Any(e => e.Id == id);
         }
+          private bool UserExists(string Email)
+         {
+             return _context.Users.Any(e => e.Email == Email);
+         }
     }
 }
+    
+    
+  
+  
+
+
